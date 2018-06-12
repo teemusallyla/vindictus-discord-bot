@@ -292,8 +292,10 @@ class discordClient(discord.Client):
             if len(messages) > 1:
                 try:
                     await self.delete_messages(messages)
-                except Exception as e:
-                    await self.send_message(message.channel, e)
+                except discord.Forbidden:
+                    for message in messages:
+                        await self.delete_message(message)
+
             elif len(messages) == 1:
                 await self.delete_message(messages[0])
             await self.send_message(message.channel, "Deleted messages")
