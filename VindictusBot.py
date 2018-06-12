@@ -296,7 +296,7 @@ class discordClient(discord.Client):
                     await self.send_message(message.channel, e)
             elif len(messages) == 1:
                 await self.delete_message(messages[0])
-            await self.send_message(message.channel, "Deleted messages(s)")
+            await self.send_message(message.channel, "Deleted messages")
 
 
         # HANDLE SNOWVISION
