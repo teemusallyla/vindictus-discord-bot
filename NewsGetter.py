@@ -20,6 +20,7 @@ for x in range(1, 4):
 
 
 news["news"] = news["news"][:25]
+news["news"].reverse()
 with open("news.json", "w+") as f:
     json.dump(news, f)
 
