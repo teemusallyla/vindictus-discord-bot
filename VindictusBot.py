@@ -318,8 +318,12 @@ class discordClient(discord.Client):
         # HANDLE REFRESH
         elif message.content.lower() == "!refresh":
             await self.send_message(message.channel, "Refreshing")
+            urls = []
             for news_piece in news["news"]:
-                await parseEvents(news_piece["link"])
+                if not news_piece["link"] in urls:
+                    urls.append(news_piece["link"])
+            for url in urls:
+                await parseEvents(url)
             await self.send_message(message.channel, "Finished")
 
         # HANDLE EMOTES
