@@ -360,6 +360,84 @@ class discordClient(discord.Client):
                 await self.wait_for_reaction(timeout=10, message=msg)
                 await self.remove_reaction(msg, emote, msg.server.me)
 
+        # HANDLE ADDING NEW EVENT
+        elif message.content.lower() == "!addevent":
+            global events
+            global sales
+
+            sender = message.author
+            channel = message.channel
+            event_type = None
+            while event_type == None:
+                await self.send_message(channel, "Enter type (event / sale)")
+                resp = await self.wait_for_message(timeout=15, author=sender)
+                if resp != None:
+                    if resp.content.lower() in ["event", "sale"]:
+                        event_type = resp.content.lower()
+                else:
+                    break
+
+            if event_type != None:
+                event_name = None
+                await self.send_message(channel, "Enter {} name".format(event_type))
+                name_resp = await self.wait_for_message(timeout=15, author=sender)
+                if name_resp != None:
+                    event_name = name_resp.content
+                
+                if event_name != None:
+                    start_date = None
+                    while start_date == None:
+                        await self.send_message(channel, "Enter starting date")
+                        start_resp = await self.wait_for_message(timeout=15, author=sender)
+                        if start_resp != None:
+                            start_mon = re.search(months_re, start_resp.content)
+                            start_day = re.search(days_re, start_resp.content)
+                            if start_mon != None and start_day != None:
+                                start_date = datetime.datetime(
+                                    datetime.date.today().year,
+                                    months_array.index(start_mon.group()),
+                                    int(start_day.group()),
+                                    10
+                                )
+                        else:
+                            break
+
+                    if start_date != None:
+                        end_date = None
+                        while end_date == None:
+                            await self.send_message(channel, "Enter ending date")
+                            end_resp = await self.wait_for_message(timeout=15, author=sender)
+                            if end_resp != None:
+                                end_mon = re.search(months_re, end_resp.content)
+                                end_day = re.search(days_re, end_resp.content)
+                                if end_mon != None and end_day != None:
+                                    start_date = datetime.datetime(
+                                        datetime.date.today().year,
+                                        months_array.index(end_mon.group()),
+                                        int(end_day.group()),
+                                        10
+                                    )
+                            else:
+                                break
+
+                        if end_date != None:
+                            link = None
+                            await self.send_message(channel, "Enter event link")
+                            link_resp = await self.wait_for_message(timeout=15, author=sender)
+                            if link_resp != None:
+                                link = link_resp.content
+
+            if event_type != None and event_name != None and start_date != None and end_date != None:
+                e = Event(event_name, start_date, end_date, link)
+                events.append(e) if event_type == "sale" else sales.append(e)
+                sales_not_finished = [sale for sale in sales if not sale.has_finished()]
+                events_not_finished = [event for event in events if not event.has_finished()]
+                with open("events.json", "w+") as f:
+                    json.dump({"events": events_not_finished, "sales": sales_not_finished}, f)
+                self.send_message(channel, "Added a new {}".format(event_type))
+            else:
+                self.send_message(channel, "Stopped adding a new event")
+
 
         #HANDLE WOLFRAM ALPHA
         elif self.user in message.mentions:
