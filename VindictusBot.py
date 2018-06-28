@@ -433,7 +433,9 @@ class discordClient(discord.Client):
                 sales_not_finished = [sale for sale in sales if not sale.has_finished()]
                 events_not_finished = [event for event in events if not event.has_finished()]
                 with open("events.json", "w+") as f:
-                    json.dump({"events": events_not_finished, "sales": sales_not_finished}, f)
+                    json.dump({
+                        "events": [event.to_json() for event in events_not_finished],
+                        "sales": [sale.to_json() for sale in sales_not_finished]}, f)
                 self.send_message(channel, "Added a new {}".format(event_type))
             else:
                 self.send_message(channel, "Stopped adding a new event")
