@@ -365,6 +365,11 @@ class discordClient(discord.Client):
         elif "disco" in message.content.lower() and message.author != self.user:
             await discoParty(message, self)
 
+    async def on_member_join(self, member):
+        if member.server.name == "Vindi":
+            newb_role = discord.utils.get(member.server.roles, name="Newbs")
+            await self.add_roles(member, newb_role)
+
 def log(text):
     limit = 2000
     if not str(datetime.date.today().year) + "-" in text:
