@@ -449,13 +449,13 @@ class discordClient(discord.Client):
                         await self.add_roles(message.author, active_role)
                         await self.add_reaction(message, "✅")
                     else:
-                        pass
+                        await self.add_reaction(message, "❌")
                 elif message.content.lower() == "!inactive":
                     if active_role in message.author.roles:
                         await self.remove_roles(message.author, active_role)
                         await self.add_reaction(message, "✅")
                     else:
-                        pass
+                        await self.add_reaction(message, "❌")
 
 
         #HANDLE WOLFRAM ALPHA
