@@ -442,16 +442,18 @@ class discordClient(discord.Client):
 
         #!ACTIVE AND !INACTIVE
         elif message.content.lower() in ["!active", "!inactive"]:
-            if message.server.name == "Vindi":
+            if message.server.name in ["Vindi", "Dev serv"]:
                 active_role = discord.utils.get(message.server.roles, name="Vindictus Active")
                 if message.content.lower() == "!active":
                     if not active_role in message.author.roles:
                         await self.add_roles(message.author, active_role)
+                        await self.add_reaction(message, "✅")
                     else:
                         pass
                 elif message.content.lower() == "!inactive":
                     if active_role in message.author.roles:
                         await self.remove_roles(message.author, active_role)
+                        await self.add_reaction(message, "✅")
                     else:
                         pass
 
