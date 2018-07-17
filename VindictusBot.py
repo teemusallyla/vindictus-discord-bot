@@ -110,33 +110,34 @@ class MusicHandler():
 
     async def handle(self, message):
         self.message = message
-        if message.content.lower().split()[2] == "play":
-            if self.message.content.split()[3] == "search":
+        command_position = 2
+        if message.content.lower().split()[command_position] == "play":
+            if self.message.content.split()[command_position + 1] == "search":
                 self.url = self.__base_yt__ + await youtubeSearch(
-                    " ".join(self.message.content.split()[4:]))
+                    " ".join(self.message.content.split()[command_position + 2:]))
             elif self.__base_yt__ in self.message.content.split()[-1]:
                 self.url = self.message.content.split()[-1]
             await self.play()
-        elif (message.content.lower().split()[2] == "pause"
+        elif (message.content.lower().split()[command_position] == "pause"
               and self.voice != None
               and self.player != None
               and self.voice.is_connected()
               and self.player.is_playing()):
             await self.pause()
-        elif (message.content.lower().split()[2] == "resume"
+        elif (message.content.lower().split()[command_position] == "resume"
               and self.voice != None
               and self.player != None
               and self.voice.is_connected()
               and not self.player.is_playing()):
             await self.resume()
-        elif (message.content.lower().split()[2] == "stop"):
+        elif (message.content.lower().split()[command_position] == "stop"):
             await self.stop()
-        elif (message.content.lower().split()[2] == "volume"
+        elif (message.content.lower().split()[command_position] == "volume"
               and self.voice != None
               and self.player != None
               and self.voice.is_connected()):
             try:
-                volume = float(message.content.split()[3])
+                volume = float(message.content.split()[command_position + 1])
                 if volume > 1:
                     volume /= 10
                 if volume > 1:
@@ -147,28 +148,28 @@ class MusicHandler():
                 await self.setVolume(volume)
             except:
                 pass
-        elif (message.content.lower().split()[2] == "next"
+        elif (message.content.lower().split()[command_position] == "next"
               and self.voice != None
               and self.player != None
               and self.voice.is_connected()):
             await self.client.send_message(message.channel, "Moving to next song!")
             await self.nextSong()
-        elif (message.content.lower().split()[2] == "queue"
+        elif (message.content.lower().split()[command_position] == "queue"
               and self.voice != None
               and self.player != None
               and self.voice.is_connected()):
-            if message.content.lower().split()[3] == "clear":
+            if message.content.lower().split()[command_position + 1] == "clear":
                 self.music_queue = asyncio.Queue()
                 await self.client.send_message(message.channel, "Queue cleared!")
-            elif message.content.lower().split()[3] == "put":
-                if message.content.lower().split()[4] == "search":
+            elif message.content.lower().split()[command_position + 1] == "put":
+                if message.content.lower().split()[command_position + 2] == "search":
                     url = self.__base_yt__ + await youtubeSearch(
-                        " ".join(self.message.content.split()[5:]))
+                        " ".join(self.message.content.split()[command_position + 3:]))
                 elif self.__base_yt__ in message.contentlower.spli()[-1]:
                     url = self.message.content.split()[-1]
                 await self.music_queue.put(url)
                 await self.client.send_message(message.channel, "Added to queue!")
-        elif message.content.lower().split()[2] == "help":
+        elif message.content.lower().split()[command_position] == "help":
             help_message = "Bot music commands:\n\
 @bot !music play _Youtube-url_\n\
 @bot !music play search _Youtube search query_\n\
@@ -462,7 +463,7 @@ class discordClient(discord.Client):
                         await self.add_reaction(message, "❌")
 
         #HANDLE MUSIC
-        elif self.user in message.mentions and "!music" in message.content.lower():
+        elif message.content.lower().split() == "!music":
             await self.mh.handle(message)
 
 
