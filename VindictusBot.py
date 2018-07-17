@@ -165,7 +165,7 @@ class MusicHandler():
                 if message.content.lower().split()[command_position + 2] == "search":
                     url = self.__base_yt__ + await youtubeSearch(
                         " ".join(self.message.content.split()[command_position + 3:]))
-                elif self.__base_yt__ in message.contentlower.spli()[-1]:
+                elif self.__base_yt__ in message.contentlower.split()[-1]:
                     url = self.message.content.split()[-1]
                 await self.music_queue.put(url)
                 await self.client.send_message(message.channel, "Added to queue!")
