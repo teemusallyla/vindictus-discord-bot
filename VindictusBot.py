@@ -15,10 +15,14 @@ import async_timeout
 from PIL import Image
 import io
 import re
+import sys
 
 post_queue = asyncio.Queue()
 wolfram_queue = asyncio.Queue()
-with open("token.txt") as f:
+dev = True if "dev" in sys.argv else False
+print("Dev bot") if dev else print("Starting Vindictus Bot")
+token_file = "token_dev.txt" if dev else "token.txt"
+with open(token_file) as f:
     token = f.read()
 log_file = "log.log"
 wolfram_appid = "7W664G-6TT5XQA4XX"
@@ -456,6 +460,10 @@ class discordClient(discord.Client):
                         await self.add_reaction(message, "✅")
                     else:
                         await self.add_reaction(message, "❌")
+
+        #HANDLE MUSIC
+        elif message.content.lower().split()[0] == "!music":
+            self.mh.handle(message)
 
 
         #HANDLE WOLFRAM ALPHA
