@@ -171,17 +171,17 @@ class MusicHandler():
                 await self.client.send_message(message.channel, "Added to queue!")
         elif message.content.lower().split()[command_position] == "help":
             help_message = "Bot music commands:\n\
-@bot !music play _Youtube-url_\n\
-@bot !music play search _Youtube search query_\n\
-@bot !music pause\n\
-@bot !music resume\n\
-@bot !music stop\n\
-@bot !music volume _value (0.0 - 1.0)_\n\
-@bot !music queue put _Youtube-url_\n\
-@bot !music queue put search _Youtube search query_\n\
-@bot !music queue clear\n\
-@bot !music next\n\
-@bot !music help\n"
+!music play _Youtube-url_\n\
+!music play search _Youtube search query_\n\
+!music pause\n\
+!music resume\n\
+!music stop\n\
+!music volume _value (0.0 - 1.0)_\n\
+!music queue put _Youtube-url_\n\
+!music queue put search _Youtube search query_\n\
+!music queue clear\n\
+!music next\n\
+!music help\n"
             await self.client.send_message(message.channel, help_message)
 
     async def play(self):
