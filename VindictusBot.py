@@ -19,7 +19,7 @@ import sys
 
 post_queue = asyncio.Queue()
 wolfram_queue = asyncio.Queue()
-dev = True if "dev" in sys.argv else False
+dev = True if "--dev" in sys.argv else False
 print("Dev bot") if dev else print("Starting Vindictus Bot")
 token_file = "token_dev.txt" if dev else "token.txt"
 with open(token_file) as f:
@@ -170,17 +170,17 @@ class MusicHandler():
                 await self.client.send_message(message.channel, "Added to queue!")
         elif message.content.lower().split()[2] == "help":
             help_message = "Bot music commands:\n\
-@bot .music play _Youtube-url_\n\
-@bot .music play search _Youtube search query_\n\
-@bot .music pause\n\
-@bot .music resume\n\
-@bot .music stop\n\
-@bot .music volume _value (0.0 - 1.0)_\n\
-@bot .music queue put _Youtube-url_\n\
-@bot .music queue put search _Youtube search query_\n\
-@bot .music queue clear\n\
-@bot .music next\n\
-@bot .music help\n"
+@bot !music play _Youtube-url_\n\
+@bot !music play search _Youtube search query_\n\
+@bot !music pause\n\
+@bot !music resume\n\
+@bot !music stop\n\
+@bot !music volume _value (0.0 - 1.0)_\n\
+@bot !music queue put _Youtube-url_\n\
+@bot !music queue put search _Youtube search query_\n\
+@bot !music queue clear\n\
+@bot !music next\n\
+@bot !music help\n"
             await self.client.send_message(message.channel, help_message)
 
     async def play(self):
