@@ -463,7 +463,7 @@ class discordClient(discord.Client):
 
         #HANDLE MUSIC
         elif message.content.lower().split()[0] == "!music":
-            self.mh.handle(message)
+            await self.mh.handle(message)
 
 
         #HANDLE WOLFRAM ALPHA
