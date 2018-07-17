@@ -250,6 +250,13 @@ class discordClient(discord.Client):
             self.tasks.append(asyncio.ensure_future(news_poster(self), loop = self.loop))
             self.tasks.append(asyncio.ensure_future(wolfram_responder(self), loop = self.loop))
             log(str(datetime.datetime.now()) + ": Ready")
+
+    async def on_voice_state_update(self, before, after):
+        if self.mh.voice != None:
+            ch = self.mh.voice.channel
+            server = self.mh.voice.server
+            if ch and len(ch.voice_members) == 1 and server.me in ch.voice_members:
+                await self.mh.stop()
  
     async def on_message(self, message):
         # !DELMSG AND !GAME
