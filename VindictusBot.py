@@ -110,7 +110,7 @@ class MusicHandler():
 
     async def handle(self, message):
         self.message = message
-        command_position = 2
+        command_position = 1
         if message.content.lower().split()[command_position] == "play":
             if self.message.content.split()[command_position + 1] == "search":
                 self.url = self.__base_yt__ + await youtubeSearch(
