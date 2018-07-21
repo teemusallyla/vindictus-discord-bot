@@ -470,7 +470,7 @@ class discordClient(discord.Client):
                         await self.add_reaction(message, "❌")
 
         #HANDLE MUSIC
-        elif message.content.lower().split()[0] == "!music":
+        elif "!music" in message.content.lower() and message.content.lower().split()[0] == "!music":
             await self.mh.handle(message)
 
 
