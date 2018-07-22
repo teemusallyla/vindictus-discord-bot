@@ -19,8 +19,13 @@ import sys
 
 post_queue = asyncio.Queue()
 wolfram_queue = asyncio.Queue()
+
 dev = True if "--dev" in sys.argv else False
-print("Dev bot") if dev else print("Starting Vindictus Bot")
+voice = True if "--voice" in sys.argv else False
+music_text = " with voice enabled" if voice else " without voice"
+bot_name = "Dev bot" if dev else "Vindictus Bot"
+
+print("Starting " + bot_name + music_text)
 token_file = "token_dev.txt" if dev else "token.txt"
 with open(token_file) as f:
     token = f.read()
@@ -471,7 +476,10 @@ class discordClient(discord.Client):
 
         #HANDLE MUSIC
         elif "!music" in message.content.lower() and message.content.lower().split()[0] == "!music":
-            await self.mh.handle(message)
+            if voice:
+                await self.mh.handle(message)
+            else:
+                await self.send_message(message.channel, "Voice chat is disabled")
 
 
         #HANDLE WOLFRAM ALPHA
