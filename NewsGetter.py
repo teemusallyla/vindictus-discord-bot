@@ -1,11 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import math
 
 news_log_length = 35
 base_url = "http://vindictus.nexon.net/news/all/"
 news = {"news": []}
-for x in range(1, 4):
+for x in range(1, math.ceil(news_log_length / 10) + 1):
     print(x)
     url = base_url + str(x)
     response = requests.get(url)
