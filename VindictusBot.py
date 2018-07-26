@@ -20,8 +20,8 @@ import sys
 post_queue = asyncio.Queue()
 wolfram_queue = asyncio.Queue()
 
-dev = True if "--dev" in sys.argv else False
-voice = True if "--voice" in sys.argv else False
+dev = True if "--dev" in sys.argv or "-d" in sys.argv else False
+voice = True if "--voice" in sys.argv or "-v" in sys.argv else False
 music_text = " with voice enabled" if voice else " without voice"
 bot_name = "Dev bot" if dev else "Vindictus Bot"
 
