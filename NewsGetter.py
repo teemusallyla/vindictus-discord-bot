@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+news_log_length = 35
 base_url = "http://vindictus.nexon.net/news/all/"
 news = {"news": []}
 for x in range(1, 4):
@@ -19,7 +20,7 @@ for x in range(1, 4):
             news["news"].append(news_item)
 
 
-news["news"] = news["news"][:25]
+news["news"] = news["news"][:news_log_length]
 news["news"].reverse()
 with open("news.json", "w+") as f:
     json.dump(news, f)

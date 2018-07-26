@@ -38,6 +38,7 @@ months_array = ["", "January", "February", "March", "April", "May", "June", "Jul
 #months_array = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 days_re = "([0-9]|)[0-9]"
 years_re = "20[0-9][0-9]"
+news_log_length = 35
 
 try:
     open(log_file).close()
@@ -544,7 +545,7 @@ async def get_news():
                 log("New news found")
         if new_news["news"] != []:
             with open("news.json", "w") as news_json:
-                news["news"] = news["news"][max(0, len(news["news"]) - 25):]
+                news["news"] = news["news"][max(0, len(news["news"]) - news_log_length):]
                 json.dump(news, news_json)
         log("News gotten")
 
