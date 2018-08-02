@@ -16,8 +16,9 @@ for x in range(1, math.ceil(news_log_length / 10) + 1):
         for news_piece in news_raw:
             news_item = {}
             news_item["title"] = news_piece.find(class_ = "news-list-item-title").text.replace("\r", "").replace("\n", "").replace("\t", "").replace("  ", "")
-            news_item["content"] = news_piece.find(class_ = "news-list-item-text").text.replace("\r", "").replace("\n", "").replace("\t", "").replace("  ", "")
+            news_item["description"] = news_piece.find(class_ = "news-list-item-text").text.replace("\r", "").replace("\n", "").replace("\t", "").replace("  ", "")
             news_item["link"] = "http://vindictus.nexon.net" + news_piece.find(class_ = "news-list-link").get("href")
+            news_item["image"] = news_piece.find(class_ = "news-thumbnail").attrs["style"][22:-2]
             news["news"].append(news_item)
 
 

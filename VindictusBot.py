@@ -532,8 +532,9 @@ async def get_news():
         for news_piece in news_raw:
             news_item = {}
             news_item["title"] = news_piece.find(class_ = "news-list-item-title").text.replace("\r", "").replace("\n", "").replace("\t", "").replace("  ", "")
-            news_item["content"] = news_piece.find(class_ = "news-list-item-text").text.replace("\r", "").replace("\n", "").replace("\t", "").replace("  ", "")
+            news_item["description"] = news_piece.find(class_ = "news-list-item-text").text.replace("\r", "").replace("\n", "").replace("\t", "").replace("  ", "")
             news_item["link"] = "http://vindictus.nexon.net" + news_piece.find(class_ = "news-list-link").get("href")
+            news_item["image"] = news_piece.find(class_ = "news-thumbnail").attrs["style"][22:-2]
             new_news["news"].append(news_item)
 
         news_list = new_news["news"]
@@ -555,10 +556,16 @@ async def news_poster(client):
     while loop.is_running():
         item = await post_queue.get()
         title = item["title"]
-        link = item["link"]
-        await parseEvents(link)
+        emb = discord.Embed(
+            title=title,
+            description=item["description"],
+            color=133916,
+            url=item["link"]
+        )
+        emb.set_thumbnail(url=item["image"])
+        await parseEvents(item["link"])
         for channel in client.post_channels:
-            await client.send_message(channel, title + " " + link)
+            await client.send_message(channel, embed=emb)
             printlog("Sent: " + title)
 
 async def wolfram_responder(client):
