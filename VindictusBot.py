@@ -557,12 +557,16 @@ async def news_poster(client):
         item = await post_queue.get()
         title = item["title"]
         emb = discord.Embed(
-            title=title,
+            title=title + " - Vindictus",
             description=item["description"],
             color=133916,
             url=item["link"]
+        ).set_thumbnail(
+            url=item["image"]
+        ).set_author(
+            name="Vindictus - Official Website",
+            url="https://vindictus.nexon.net"
         )
-        emb.set_thumbnail(url=item["image"])
         await parseEvents(item["link"])
         for channel in client.post_channels:
             await client.send_message(channel, embed=emb)
