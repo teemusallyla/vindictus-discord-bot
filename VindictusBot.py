@@ -29,6 +29,8 @@ print("Starting " + bot_name + music_text)
 token_file = "token_dev.txt" if dev else "token.txt"
 with open(token_file) as f:
     token = f.read()
+with open("messages.json") as f:
+    sent_messages = json.load(f)["messages"]
 log_file = "log.log"
 wolfram_appid = "7W664G-6TT5XQA4XX"
 wolfram_url = "http://api.wolframalpha.com/v1/result"
@@ -553,24 +555,55 @@ async def get_news():
         await asyncio.sleep(60)
 
 async def news_poster(client):
+    global sent_messages
     while loop.is_running():
         item = await post_queue.get()
         title = item["title"]
+        link = item["link"]
+        news_id = link.split("/")[4]
         emb = discord.Embed(
             title=title + " - Vindictus",
             description=item["description"],
             color=133916,
-            url=item["link"]
+            url=link
         ).set_thumbnail(
             url=item["image"]
         ).set_author(
             name="Vindictus - Official Website",
             url="https://vindictus.nexon.net"
         )
-        await parseEvents(item["link"])
+        
+        for message in sent_messages:
+            if message["id"] == news_id:
+                id_dict = message
+                break
+        else:
+            id_dict = {"id": news_id}
+            sent_messages.append(id_dict)
+
         for channel in client.post_channels:
-            await client.send_message(channel, embed=emb)
-            printlog("Sent: " + title)
+            if not channel.id in id_dict or "maintenance" in title.lower() or "maintenance" in item["description"].lower():
+                sent_message = await client.send_message(channel, embed=emb)
+                printlog("Sent: " + title)
+                id_dict[channel.id] = sent_message.id
+            else:
+                try:
+                    previous_message = await client.get_message(channel, id_dict[channel.id])
+                    await client.edit_message(previous_message, embed=emb)
+                    printlog("Edited: " + title)
+                except discord.NotFound:
+                    printlog("Tried to look for a message, not found")
+                except discord.Forbidden:
+                    printlog("Tried to look for a message, not allowed")
+                except discord.HTTPException:
+                    printlog("Tried to look for / edit a message, couldn't")
+
+        sent_messages = sent_messages[max(0, len(sent_messages) - news_log_length):]
+        with open("messages.json", "w") as messages_json:
+            json.dump({"messages": sent_messages}, messages_json)
+
+        await parseEvents(link)
+
 
 async def wolfram_responder(client):
     while loop.is_running():
