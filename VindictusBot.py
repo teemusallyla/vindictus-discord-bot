@@ -242,6 +242,7 @@ class discordClient(discord.Client):
         self.player = None
         self.voice = None
         self.mh = MusicHandler(self)
+        self.trash_messages = []
         
         for server in self.servers:
             for channel in server.channels:
@@ -298,6 +299,31 @@ class discordClient(discord.Client):
                         await self.send_message(message.channel, "Message deleted")
                     except:
                         await self.send_message(message.channel, "Couldn't delete message")
+        elif len(message.content.split()) > 1 and message.content.split()[0] == "!purge":
+            # !purge userid start_msg_id end_msg_id
+            appinfo = await self.application_info()
+            if message.author == appinfo.owner:
+                auth = message.content.split()[1]
+                start_msg_id = message.content.split()[2]
+                end_msg_id = message.content.split()[3]
+                try:
+                    start_msg = await self.get_message(message.channel, start_msg_id)
+                    end_msg = await self.get_message(message.channel, end_msg_id)
+                    await self.purge_from(
+                        message.channel,
+                        check=lambda msg: msg.author.id == auth,
+                        before=end_msg,
+                        after=start_msg)
+                except discord.Forbidden:
+                    await self.send_message(message.channel, "Not allowed")
+                except discord.NotFound:
+                    await self.send_message(message.channel, "Message not found")
+                except discord.HTTPException:
+                    await self.send_message(message.channel, "Failed")
+            else:
+                await self.send_message(message.channel, "You have no permission")
+                
+                
 
         # !DELMESSAGES
         elif message.channel.is_private and "!delmessages" in message.content.lower():
