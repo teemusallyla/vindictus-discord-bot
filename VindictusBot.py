@@ -411,12 +411,13 @@ class discordClient(discord.Client):
             global events
             global sales
 
+            timeo = 30
             sender = message.author
             channel = message.channel
             event_type = None
             while event_type == None:
                 await self.send_message(channel, "Enter type (event / sale)")
-                resp = await self.wait_for_message(timeout=15, author=sender)
+                resp = await self.wait_for_message(timeout=timeo, author=sender)
                 if resp != None:
                     if resp.content.lower() in ["event", "sale"]:
                         event_type = resp.content.lower()
@@ -426,7 +427,7 @@ class discordClient(discord.Client):
             if event_type != None:
                 event_name = None
                 await self.send_message(channel, "Enter {} name".format(event_type))
-                name_resp = await self.wait_for_message(timeout=15, author=sender)
+                name_resp = await self.wait_for_message(timeout=timeo, author=sender)
                 if name_resp != None:
                     event_name = name_resp.content
                 
@@ -434,7 +435,7 @@ class discordClient(discord.Client):
                     start_date = None
                     while start_date == None:
                         await self.send_message(channel, "Enter starting date")
-                        start_resp = await self.wait_for_message(timeout=15, author=sender)
+                        start_resp = await self.wait_for_message(timeout=timeo, author=sender)
                         if start_resp != None:
                             start_mon = re.search(months_re, start_resp.content)
                             start_day = re.search(days_re, start_resp.content)
@@ -452,7 +453,7 @@ class discordClient(discord.Client):
                         end_date = None
                         while end_date == None:
                             await self.send_message(channel, "Enter ending date")
-                            end_resp = await self.wait_for_message(timeout=15, author=sender)
+                            end_resp = await self.wait_for_message(timeout=timeo, author=sender)
                             if end_resp != None:
                                 end_mon = re.search(months_re, end_resp.content)
                                 end_day = re.search(days_re, end_resp.content)
@@ -469,7 +470,7 @@ class discordClient(discord.Client):
                         if end_date != None:
                             link = None
                             await self.send_message(channel, "Enter event link")
-                            link_resp = await self.wait_for_message(timeout=15, author=sender)
+                            link_resp = await self.wait_for_message(timeout=timeo, author=sender)
                             if link_resp != None:
                                 link = link_resp.content
 
