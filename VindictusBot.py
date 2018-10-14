@@ -410,15 +410,18 @@ class discordClient(discord.Client):
         elif message.content.lower() == "!addevent":
             global events
             global sales
+            self.trash_messages.append(message)
 
             timeo = 30
             sender = message.author
             channel = message.channel
             event_type = None
             while event_type == None:
-                await self.send_message(channel, "Enter type (event / sale)")
+                m = await self.send_message(channel, "Enter type (event / sale)")
+                self.trash_messages.append(m)
                 resp = await self.wait_for_message(timeout=timeo, author=sender)
                 if resp != None:
+                    self.trash_messages.append(resp)
                     if resp.content.lower() in ["event", "sale"]:
                         event_type = resp.content.lower()
                 else:
@@ -426,17 +429,21 @@ class discordClient(discord.Client):
 
             if event_type != None:
                 event_name = None
-                await self.send_message(channel, "Enter {} name".format(event_type))
+                m = await self.send_message(channel, "Enter {} name".format(event_type))
+                self.trash_messages.append(m)
                 name_resp = await self.wait_for_message(timeout=timeo, author=sender)
                 if name_resp != None:
+                    self.trash_messages.append(name_resp)
                     event_name = name_resp.content
                 
                 if event_name != None:
                     start_date = None
                     while start_date == None:
-                        await self.send_message(channel, "Enter starting date")
+                        m = await self.send_message(channel, "Enter starting date")
+                        self.trash_messages.append(m)
                         start_resp = await self.wait_for_message(timeout=timeo, author=sender)
                         if start_resp != None:
+                            self.trash_messages.append(start_resp)
                             start_mon = re.search(months_re, start_resp.content)
                             start_day = re.search(days_re, start_resp.content)
                             if start_mon != None and start_day != None:
@@ -452,9 +459,11 @@ class discordClient(discord.Client):
                     if start_date != None:
                         end_date = None
                         while end_date == None:
-                            await self.send_message(channel, "Enter ending date")
+                            m = await self.send_message(channel, "Enter ending date")
+                            self.trash_messages.append(m)
                             end_resp = await self.wait_for_message(timeout=timeo, author=sender)
                             if end_resp != None:
+                                self.trash_messages.append(end_resp)
                                 end_mon = re.search(months_re, end_resp.content)
                                 end_day = re.search(days_re, end_resp.content)
                                 if end_mon != None and end_day != None:
@@ -469,9 +478,11 @@ class discordClient(discord.Client):
 
                         if end_date != None:
                             link = None
-                            await self.send_message(channel, "Enter event link")
+                            m = await self.send_message(channel, "Enter event link")
+                            self.trash_messages.append(m)
                             link_resp = await self.wait_for_message(timeout=timeo, author=sender)
                             if link_resp != None:
+                                self.trash_messages.append(link_resp)
                                 link = link_resp.content
 
             if event_type != None and event_name != None and start_date != None and end_date != None:
@@ -486,6 +497,8 @@ class discordClient(discord.Client):
                 await self.send_message(channel, "Added a new {}".format(event_type))
             else:
                 await self.send_message(channel, "Stopped adding a new event")
+
+            await self.delete_messages(self.trash_messages)
 
         #!ACTIVE AND !INACTIVE
         elif message.content.lower() in ["!active", "!inactive"]:
