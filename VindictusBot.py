@@ -494,7 +494,10 @@ class discordClient(discord.Client):
                     json.dump({
                         "events": [event.to_json() for event in events_not_finished],
                         "sales": [sale.to_json() for sale in sales_not_finished]}, f)
-                await self.send_message(channel, "Added a new {}".format(event_type))
+                sender_name = sender.nick or sender.name
+                await self.send_message(channel, "{} added a new {}: {}".format(sender_name,
+                                                                                event_type,
+                                                                                event_name))
             else:
                 await self.send_message(channel, "Stopped adding a new event")
 
