@@ -16,6 +16,7 @@ from PIL import Image
 import io
 import re
 import sys
+import os
 
 post_queue = asyncio.Queue()
 wolfram_queue = asyncio.Queue()
@@ -31,6 +32,15 @@ with open(token_file) as f:
     token = f.read()
 with open("messages.json") as f:
     sent_messages = json.load(f)["messages"]
+
+if not "notifications.json" in os.listdir():
+    notifications = []
+    with open("notifications.json", "w+") as f:
+        json.dump(notifications, f)
+else:
+    with open("notifications.json") as f:
+        notifications = json.load(f)
+
 log_file = "log.log"
 wolfram_appid = "7W664G-6TT5XQA4XX"
 wolfram_url = "http://api.wolframalpha.com/v1/result"
@@ -258,6 +268,7 @@ class discordClient(discord.Client):
             self.tasks.append(asyncio.ensure_future(get_news(), loop = self.loop))
             self.tasks.append(asyncio.ensure_future(news_poster(self), loop = self.loop))
             self.tasks.append(asyncio.ensure_future(wolfram_responder(self), loop = self.loop))
+            self.tasks.append(asyncio.ensure_future(notifier(self), loop = self.loop))
             log(str(datetime.datetime.now()) + ": Ready")
 
     async def on_voice_state_update(self, before, after):
@@ -527,6 +538,41 @@ class discordClient(discord.Client):
             else:
                 await self.send_message(message.channel, "Voice chat is disabled")
 
+        # !NOTIFY
+        elif "!notify" in message.content.lower() and len(message.content.split()) > 1:
+            global notifications
+            cnt = message.content
+            time_pattern = "([0-2]?[0-9]:[0-5][0-9])"
+            day_pattern = "([0-3]?[0-9])(?: ?st| ?nd| ?rd| ?th)"
+            full_pattern = "(" + months_re + ")" + " " + day_pattern + ",* " + time_pattern + " (.*)"
+            result = re.search(full_pattern, cnt)
+            if result:
+                cur_year = datetime.datetime.now().year
+                month = result.group(1)
+                day = result.group(2)
+                time = result.group(3)
+                text = result.group(4)
+                dt = datetime.datetime(
+                    year=cur_year,
+                    month=months_array.index(month),
+                    day=int(day),
+                    hour=int(time.split(":")[0]),
+                    minute=int(time.split(":")[1]),
+                )
+                notifi = {
+                    "time": dt.timestamp(),
+                    "text": text,
+                    "channel": message.channel.id
+                }
+                notifications.append(notifi)
+                with open("notifications.json", "w") as f:
+                    json.dump(notifications, f)
+                await self.send_message(message.channel, "New notification created!")
+            else:
+                await self.send_message(message.channel, "Couldn't parse the message, make sure its format is 'December 24th 18:00 Merry Christmas Everyone!'")
+                await self.send_message(message.channel, full_pattern)
+                await self.send_message(message.channel, cnt)
+
 
         #HANDLE WOLFRAM ALPHA
         elif self.user in message.mentions:
@@ -647,6 +693,17 @@ async def news_poster(client):
 
         await parseEvents(link)
 
+async def notifier(client):
+    global notifications
+    while loop.is_running():
+        for ind in range(len(notifications)):
+            notification = notifications[ind]
+            if notification["time"] < time.time():
+                await client.send_message(client.get_channel(notification["channel"]), notification["text"])
+                del notifications[ind]
+                with open("notifications.json", "w") as f:
+                    json.dump(notifications, f)
+        await asyncio.sleep(30)
 
 async def wolfram_responder(client):
     while loop.is_running():
