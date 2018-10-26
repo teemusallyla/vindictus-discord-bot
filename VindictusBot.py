@@ -540,6 +540,12 @@ class discordClient(discord.Client):
 
         # !NOTIFY
         elif "!notify" in message.content.lower() and len(message.content.split()) > 1:
+            if "!notify_everyone" in message.content.lower():
+                text = "@everyone "
+            elif "!notify_here" in message.content.lower():
+                text = "@here "
+            else:
+                text = ""
             global notifications
             cnt = message.content
             time_pattern = "([0-2]?[0-9]:[0-5][0-9])"
@@ -551,7 +557,7 @@ class discordClient(discord.Client):
                 month = result.group(1)
                 day = result.group(2)
                 time = result.group(3)
-                text = result.group(4)
+                text += result.group(4)
                 dt = datetime.datetime(
                     year=cur_year,
                     month=months_array.index(month),
