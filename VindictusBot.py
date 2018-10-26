@@ -539,7 +539,7 @@ class discordClient(discord.Client):
                 await self.send_message(message.channel, "Voice chat is disabled")
 
         # !NOTIFY
-        elif "!notify" in message.content.lower() and len(message.content.split()) > 1:
+        elif "!notify" in message.content.lower() and "!notify" in message.content.lower().split()[0]:
             if "!notify_everyone" in message.content.lower():
                 text = "@everyone "
             elif "!notify_here" in message.content.lower():
