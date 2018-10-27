@@ -702,12 +702,16 @@ async def news_poster(client):
 async def notifier(client):
     global notifications
     while loop.is_running():
+        to_delete = []
         for notification in notifications:
             if notification["time"] < time.time():
                 await client.send_message(client.get_channel(notification["channel"]), notification["text"])
-                notifications.remove(notification)
-                with open("notifications.json", "w") as f:
-                    json.dump(notifications, f)
+                to_delete.append(notification)
+        if to_delete:
+            for n in to_delete:
+                notifications.remove(n)
+            with open("notifications.json", "w") as f:
+                json.dump(notifications, f)
         await asyncio.sleep(30)
 
 async def wolfram_responder(client):
