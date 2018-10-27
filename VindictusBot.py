@@ -576,9 +576,6 @@ class discordClient(discord.Client):
                 await self.send_message(message.channel, "New notification created!")
             else:
                 await self.send_message(message.channel, "Couldn't parse the message, make sure its format is 'December 24th 18:00 Merry Christmas Everyone!'")
-                await self.send_message(message.channel, full_pattern)
-                await self.send_message(message.channel, cnt)
-
 
         #HANDLE WOLFRAM ALPHA
         elif self.user in message.mentions:
