@@ -702,11 +702,10 @@ async def news_poster(client):
 async def notifier(client):
     global notifications
     while loop.is_running():
-        for ind in range(len(notifications)):
-            notification = notifications[ind]
+        for notification in notifications:
             if notification["time"] < time.time():
                 await client.send_message(client.get_channel(notification["channel"]), notification["text"])
-                del notifications[ind]
+                notifications.remove(notification)
                 with open("notifications.json", "w") as f:
                     json.dump(notifications, f)
         await asyncio.sleep(30)
