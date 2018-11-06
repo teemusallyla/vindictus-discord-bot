@@ -652,10 +652,11 @@ async def news_poster(client):
         item = await post_queue.get()
         title = item["title"]
         link = item["link"]
+        desc = item["description"]
         news_id = link.split("/")[4]
         emb = discord.Embed(
             title=title + " - Vindictus",
-            description=item["description"],
+            description=desc,
             color=133916,
             url=link
         ).set_thumbnail(
@@ -673,8 +674,11 @@ async def news_poster(client):
             id_dict = {"id": news_id}
             sent_messages.append(id_dict)
 
+        maint = "maintenance" in title.lower() or "maintenance" in desc
+        completed_maint = maint and "complete" in desc
+        extended_maint = maint and "extend" in desc
         for channel in client.post_channels:
-            if not channel.id in id_dict or "maintenance" in title.lower() or "maintenance" in item["description"].lower():
+            if not channel.id in id_dict or completed_maint or extended_maint:
                 sent_message = await client.send_message(channel, embed=emb)
                 printlog("Sent: " + title)
                 id_dict[channel.id] = sent_message.id
