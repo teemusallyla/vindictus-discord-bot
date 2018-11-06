@@ -674,9 +674,9 @@ async def news_poster(client):
             id_dict = {"id": news_id}
             sent_messages.append(id_dict)
 
-        maint = "maintenance" in title.lower() or "maintenance" in desc
-        completed_maint = maint and "complete" in desc
-        extended_maint = maint and "extend" in desc
+        maint = "maintenance" in title.lower() or "maintenance" in desc.lower()
+        completed_maint = maint and "complete" in desc.lower()
+        extended_maint = maint and "extend" in desc.lower()
         for channel in client.post_channels:
             if not channel.id in id_dict or completed_maint or extended_maint:
                 sent_message = await client.send_message(channel, embed=emb)
