@@ -458,9 +458,10 @@ class discordClient(discord.Client):
                             start_mon = re.search(months_re, start_resp.content)
                             start_day = re.search(days_re, start_resp.content)
                             if start_mon != None and start_day != None:
+                                start_mon = months_array.index(start_mon.group())
                                 start_date = datetime.datetime(
                                     datetime.date.today().year,
-                                    months_array.index(start_mon.group()),
+                                    start_mon,
                                     int(start_day.group()),
                                     10
                                 )
