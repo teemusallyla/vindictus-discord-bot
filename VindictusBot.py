@@ -478,9 +478,12 @@ class discordClient(discord.Client):
                                 end_mon = re.search(months_re, end_resp.content)
                                 end_day = re.search(days_re, end_resp.content)
                                 if end_mon != None and end_day != None:
+                                    end_mon = months_array.index(end_mon.group())
+                                    end_year = datetime.date.today().year
+                                    end_year = end_year + 1 if end_mon < start_mon else end_year
                                     end_date = datetime.datetime(
-                                        datetime.date.today().year,
-                                        months_array.index(end_mon.group()),
+                                        end_year,
+                                        end_mon,
                                         int(end_day.group()),
                                         10
                                     )
