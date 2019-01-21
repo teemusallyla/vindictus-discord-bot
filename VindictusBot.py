@@ -28,10 +28,19 @@ bot_name = "Dev bot" if dev else "Vindictus Bot"
 
 print("Starting " + bot_name + music_text)
 token_file = "token_dev.txt" if dev else "token.txt"
+config_file = "dev.config" if dev else "bot.config"
 with open(token_file) as f:
     token = f.read()
-with open("messages.json") as f:
-    sent_messages = json.load(f)["messages"]
+if not "messages.json" in os.listdir():
+    sent_messages = []
+    with open("messages.json", "w+") as f:
+        json.dump({"messages": sent_messages}, f)
+else:
+    with open("messages.json") as f:
+        sent_messages = json.load(f)["messages"]
+
+with open(config_file) as f:
+    configs = json.load(f)
 
 if not "notifications.json" in os.listdir():
     notifications = []
@@ -253,13 +262,18 @@ class discordClient(discord.Client):
         self.voice = None
         self.mh = MusicHandler(self)
         self.trash_messages = []
-        
-        for server in self.servers:
-            for channel in server.channels:
-                if channel.name == "general":
-                    self.post_channels.append(channel)
-                    print("Posting to: " + channel.name + " in " + server.name)
 
+        servers_in_configs = configs["guilds"].keys()
+        for server in self.servers:
+            if not server.id in servers_in_configs:
+                configs["guilds"][server.id] = configs["base"].copy()
+            post_channel = configs["guilds"][server.id]["news_channel"]
+            if post_channel:
+                post_channel = self.get_channel(post_channel)
+                self.post_channels.append(post_channel)
+                print("Posting to: " + post_channel.name + " in " + server.name)
+        appinfo = await self.application_info()
+        self.owner = appinfo.owner
         try:
             self.tasks
             printlog("Client restarted for some reason")
@@ -270,6 +284,25 @@ class discordClient(discord.Client):
             self.tasks.append(asyncio.ensure_future(wolfram_responder(self), loop = self.loop))
             self.tasks.append(asyncio.ensure_future(notifier(self), loop = self.loop))
             log(str(datetime.datetime.now()) + ": Ready")
+
+    async def on_server_join(self, server):
+        for ch in server.channels:
+            if ch.name == "general":
+                post_ch = ch
+                break
+        configs["guilds"][server.id] = configs["base"].copy()
+        if post_ch:
+            configs["guilds"][server.id]["news_channel"] = post_ch.id
+            await self.send_message(
+                post_ch,
+                "Posting news to this channel. Change this with !channel *#general*"
+            )
+            print("Posting to " + post_ch.name + " in " + server.name)
+
+    async def on_server_remove(self, server):
+        self.post_channels = [ch for ch in self.post_channels if ch.server != server]
+        if server.id in configs["guilds"]:
+            del configs["guilds"][server.id]
 
     async def on_voice_state_update(self, before, after):
         if self.mh.voice != None:
@@ -458,9 +491,10 @@ class discordClient(discord.Client):
                             start_mon = re.search(months_re, start_resp.content)
                             start_day = re.search(days_re, start_resp.content)
                             if start_mon != None and start_day != None:
+                                start_mon = months_array.index(start_mon.group())
                                 start_date = datetime.datetime(
                                     datetime.date.today().year,
-                                    months_array.index(start_mon.group()),
+                                    start_mon,
                                     int(start_day.group()),
                                     10
                                 )
@@ -579,6 +613,16 @@ class discordClient(discord.Client):
                 await self.send_message(message.channel, "New notification created!")
             else:
                 await self.send_message(message.channel, "Couldn't parse the message, make sure its format is 'December 24th 18:00 Merry Christmas Everyone!'")
+
+        # CONFIGS
+        elif "!channel" in message.content and len(message.channel_mentions) == 1:
+            perm = message.author.server_permissions
+            owner = message.author == self.owner
+            if perm.administrator or perm.manage_server or owner:
+                ch = message.channel_mentions[0]
+                self.post_channels.append(ch)
+                configs["guilds"][message.server.id]["news_channel"] = ch.id
+                await self.send_message(message.channel, "Posting news to " + ch.mention)
 
         #HANDLE WOLFRAM ALPHA
         elif self.user in message.mentions:
@@ -924,3 +968,5 @@ finally:
     loop.stop()
     loop.close()
     printlog("Loop closed")
+    with open("bot.config", "w") as f:
+        json.dump(configs, f)
