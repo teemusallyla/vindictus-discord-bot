@@ -164,11 +164,11 @@ class discordClient(discord.Client):
     async def on_message(self, message):
         # !DELMSG AND !GAME
         if message.channel.is_private and "!game" in message.content:
-            await self.change_presence(game =
-                discord.Game(name = " ".join(message.content.split()[1:])))
+            if message.author == self.owner:
+                await self.change_presence(game =
+                    discord.Game(name = " ".join(message.content.split()[1:])))
         elif message.channel.is_private and "!delmsg" in message.content:
-            self.appinfo = await self.application_info()
-            if message.author == self.appinfo.owner:
+            if message.author == self.owner:
                 msgid = message.content.split()[-1]
                 msg = None
                 if len(message.content.split()) == 2:
@@ -455,7 +455,7 @@ class discordClient(discord.Client):
                     json.dump(notifications, f)
                 await self.send_message(message.channel, "New notification created!")
             else:
-                await self.send_message(message.channel, "Couldn't parse the message, make sure its format is 'December 24th 18:00 Merry Christmas Everyone!'")
+                await self.send_message(message.channel, "Couldn't parse the message, make sure its format is '!notify December 24th 18:00 Merry Christmas Everyone!'")
 
         # CONFIGS
         elif "!channel" in message.content and len(message.channel_mentions) == 1:

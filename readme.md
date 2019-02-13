@@ -16,8 +16,6 @@ Things it does:
 * Some administrative tools (delete messages by masses)
 * Add role to member on server join
 * Add role on command (not in use)
-* Play music from Youtube (probably going to be removed)
-* Sings [Disco, Disco! Party, Party!](https://www.youtube.com/watch?v=vrphLUWZv3Q) with you
 
 TODO:
 * Some refactoring maybe
@@ -30,3 +28,23 @@ TODO:
 * Remove music playing capabilities (there are better things for this)
 * Put WolframAlpha integration into a command instead of mention
 * Improve configurability
+
+COMMANDS:
+* !events
+    * Posts currently on-going Vindictus events
+* !sales
+    * Posts currently on-going Vindictus sales
+* !wolframalpha, !wolf, !alpha, !wolfram [query]
+    * Asks WolframAlpha your query
+* !emote, !animated [emoji name]
+    * Posts an emote specified by its name, even from another server (in which the bot is a member)
+* !react [msg id] [ch id] [emote name]
+    * Reacts to a specific messgage with given emoji. Emoji can be from outside server or animated
+* !notify
+    * Add a notification for a later date
+* !channel [#channel]
+    * Specify the channel in which the bot should post Vindictus news
+* !delmsg [ch id] [msg id]
+    * Delete a specific message. Only for bot owner
+* !game [game]
+    * Change the bot's "Playing" message. Only for bot owner
