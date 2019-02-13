@@ -24,9 +24,6 @@ TODO:
 * Move to [discord.py]() rewrite
 * Add capability to recognize maintenances
     * Put maintenance status to bot playing status
-* Remove discoparty thing
-* Remove music playing capabilities (there are better things for this)
-* Put WolframAlpha integration into a command instead of mention
 * Improve configurability
 
 COMMANDS:
