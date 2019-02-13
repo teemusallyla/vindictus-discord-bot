@@ -22,11 +22,9 @@ post_queue = asyncio.Queue()
 wolfram_queue = asyncio.Queue()
 
 dev = True if "--dev" in sys.argv or "-d" in sys.argv else False
-voice = True if "--voice" in sys.argv or "-v" in sys.argv else False
-music_text = " with voice enabled" if voice else " without voice"
 bot_name = "Dev bot" if dev else "Vindictus Bot"
 
-print("Starting " + bot_name + music_text)
+print("Starting " + bot_name)
 token_file = "token_dev.txt" if dev else "token.txt"
 config_file = "dev.config" if dev else "bot.config"
 with open(token_file) as f:
@@ -113,154 +111,13 @@ with open("events.json") as events_json:
     events_sales = json.load(events_json)
     events = list(map(lambda x: Event(jjson=x), events_sales["events"]))
     sales = list(map(lambda x: Event(jjson=x), events_sales["sales"]))
-
-class MusicHandler():
-    def __init__(self, client, message = None):
-        self.__base_yt__ = "https://www.youtube.com/watch?v="
-        self.message = message
-        self.client = client
-        self.voice = None
-        self.player = None
-        self.url = None
-        self.play_next = False
-        self.music_queue = asyncio.Queue()
-        self.volume = 0.2
-        if self.message != None:
-            self.handle(message)
-        self.stopped = False
-
-    def __call__(self):
-        if not self.stopped:
-            func = asyncio.run_coroutine_threadsafe(self.nextSong(), loop = self.client.loop)
-            func.result()
-        self.stopped = False
-
-    async def handle(self, message):
-        self.message = message
-        command_position = 1
-        if message.content.lower().split()[command_position] == "play":
-            if self.message.content.split()[command_position + 1] == "search":
-                self.url = self.__base_yt__ + await youtubeSearch(
-                    " ".join(self.message.content.split()[command_position + 2:]))
-            elif self.__base_yt__ in self.message.content.split()[-1]:
-                self.url = self.message.content.split()[-1]
-            await self.play()
-        elif (message.content.lower().split()[command_position] == "pause"
-              and self.voice != None
-              and self.player != None
-              and self.voice.is_connected()
-              and self.player.is_playing()):
-            await self.pause()
-        elif (message.content.lower().split()[command_position] == "resume"
-              and self.voice != None
-              and self.player != None
-              and self.voice.is_connected()
-              and not self.player.is_playing()):
-            await self.resume()
-        elif (message.content.lower().split()[command_position] == "stop"):
-            await self.stop()
-        elif (message.content.lower().split()[command_position] == "volume"
-              and self.voice != None
-              and self.player != None
-              and self.voice.is_connected()):
-            try:
-                volume = float(message.content.split()[command_position + 1])
-                if volume > 1:
-                    volume /= 10
-                if volume > 1:
-                    volume = 1
-                if volume < 0:
-                    volume = 0
-                self.volume = volume
-                await self.setVolume(volume)
-            except:
-                pass
-        elif (message.content.lower().split()[command_position] == "next"
-              and self.voice != None
-              and self.player != None
-              and self.voice.is_connected()):
-            await self.client.send_message(message.channel, "Moving to next song!")
-            await self.nextSong()
-        elif (message.content.lower().split()[command_position] == "queue"
-              and self.voice != None
-              and self.player != None
-              and self.voice.is_connected()):
-            if message.content.lower().split()[command_position + 1] == "clear":
-                self.music_queue = asyncio.Queue()
-                await self.client.send_message(message.channel, "Queue cleared!")
-            elif message.content.lower().split()[command_position + 1] == "put":
-                if message.content.lower().split()[command_position + 2] == "search":
-                    url = self.__base_yt__ + await youtubeSearch(
-                        " ".join(self.message.content.split()[command_position + 3:]))
-                elif self.__base_yt__ in message.contentlower.split()[-1]:
-                    url = self.message.content.split()[-1]
-                await self.music_queue.put(url)
-                await self.client.send_message(message.channel, "Added to queue!")
-        elif message.content.lower().split()[command_position] == "help":
-            help_message = "Bot music commands:\n\
-!music play _Youtube-url_\n\
-!music play search _Youtube search query_\n\
-!music pause\n\
-!music resume\n\
-!music stop\n\
-!music volume _value (0.0 - 1.0)_\n\
-!music queue put _Youtube-url_\n\
-!music queue put search _Youtube search query_\n\
-!music queue clear\n\
-!music next\n\
-!music help\n"
-            await self.client.send_message(message.channel, help_message)
-
-    async def play(self):
-        if self.voice == None:
-            for channel in self.message.server.channels:
-                if (channel.type == discord.ChannelType.voice
-                    and self.message.author in channel.voice_members):
-                    self.voice = await self.client.join_voice_channel(channel)
-                    break
-
-        if self.url != None and self.voice != None:
-            if self.player != None:
-                self.stopped = True
-                self.player.stop()
-            self.player = await self.voice.create_ytdl_player(self.url, after = self)
-            self.player.volume = self.volume
-            self.player.start()
-            await self.client.send_message(self.message.channel, "Now playing: "
-                                    + self.player.title)
-
-    async def pause(self):
-        self.player.pause()
-
-    async def resume(self):
-        self.player.resume()
-
-    async def stop(self):
-        if self.player != None:
-            self.stopped = True
-            self.player.stop()
-            self.player = None
-        if self.voice != None and self.voice.is_connected():
-            await self.voice.disconnect()
-        if self.voice != None:
-            self.voice = None
-
-    async def setVolume(self, value):
-        self.player.volume = value
-
-    async def nextSong(self):
-        if not self.music_queue.empty():
-            self.url = await self.music_queue.get()
-        await self.play()
-        self.stopped = False
-  
+ 
 
 class discordClient(discord.Client):
     async def on_ready(self): 
         self.post_channels = []
         self.player = None
         self.voice = None
-        self.mh = MusicHandler(self)
         self.trash_messages = []
 
         servers_in_configs = configs["guilds"].keys()
@@ -303,13 +160,6 @@ class discordClient(discord.Client):
         self.post_channels = [ch for ch in self.post_channels if ch.server != server]
         if server.id in configs["guilds"]:
             del configs["guilds"][server.id]
-
-    async def on_voice_state_update(self, before, after):
-        if self.mh.voice != None:
-            ch = self.mh.voice.channel
-            server = self.mh.voice.server
-            if ch and len(ch.voice_members) == 1 and server.me in ch.voice_members:
-                await self.mh.stop()
  
     async def on_message(self, message):
         # !DELMSG AND !GAME
@@ -568,13 +418,6 @@ class discordClient(discord.Client):
                     else:
                         await self.add_reaction(message, "❌")
 
-        #HANDLE MUSIC
-        elif "!music" in message.content.lower() and message.content.lower().split()[0] == "!music":
-            if voice:
-                await self.mh.handle(message)
-            else:
-                await self.send_message(message.channel, "Voice chat is disabled")
-
         # !NOTIFY
         elif "!notify" in message.content.lower() and "!notify" in message.content.lower().split()[0]:
             if "!notify_everyone" in message.content.lower():
@@ -625,12 +468,9 @@ class discordClient(discord.Client):
                 await self.send_message(message.channel, "Posting news to " + ch.mention)
 
         #HANDLE WOLFRAM ALPHA
-        elif self.user in message.mentions:
+        elif len(message.content) > 1 and message.content.lower().split()[0] in ["!wolfram", "!alpha", "!wolf", "!wolframalpha"]:
             await wolfram_queue.put(message)
 
-        #HANDLE DISCO PARTY
-        elif "disco" in message.content.lower() and message.author != self.user:
-            await discoParty(message, self)
 
     async def on_member_join(self, member):
         if member.server.name == "Vindi":
@@ -774,44 +614,12 @@ async def wolfram_responder(client):
                 answer = await resp.text()
         if answer == "Wolfram|Alpha did not understand your input":
             answer = "I didn't quite understand"
-        mention = "<@" + message.author.id + ">"
         if len(answer) > 1000:
             count = math.ceil(len(answer) / 1000)
             for x in range(0, count):
-                await client.send_message(message.channel, mention + " " + answer[1000 * x : 1000 * (x + 1)])
+                await client.send_message(message.channel, answer[1000 * x : 1000 * (x + 1)])
         else:
-            await client.send_message(message.channel, mention + " " + answer)
-
-async def discoParty(message, client):
-    msg = message.content.lower()
-    newmsg = ""
-    to_return = None
-    for letter in msg:
-        if not letter in string.punctuation:
-            newmsg += letter
-        elif letter in string.punctuation:
-            newmsg += " "
-    newmsg.replace("  ", " ")
-    if "you say disco" in newmsg:
-        to_return = "Disco, Disco!"
-    elif "i say disco" in newmsg and not "you say party" in newmsg:
-        to_return = "I say Party!"
-    elif ("i say disco" in newmsg and "you say party" in newmsg
-          and newmsg.split(" ").count("disco") > 1):
-        to_return = "Party, " * (newmsg.split(" ").count("disco") - 2) + "Party!"
-    elif not "i say disco" in newmsg and "disco" in newmsg.split():
-        to_return =  "Party, " * (newmsg.split(" ").count("disco") - 1) + "Party!"
-    if not to_return == None:
-        await client.send_typing(message.channel)
-        await client.send_message(message.channel, to_return)
-
-async def youtubeSearch(query):
-    params = {"search_query": query}
-    async with aiohttp.ClientSession() as session:
-        async with session.get("https://www.youtube.com/results", params = params) as resp:
-            soup = BeautifulSoup(await resp.text(), "html.parser")
-            vid_div = soup.find_all("div", class_ = "yt-lockup-video")[0]
-            return vid_div.get_attribute_list("data-context-item-id")[0]
+            await client.send_message(message.channel, answer)
 
 async def sendImage(url, destination, client):
     try:
@@ -969,5 +777,5 @@ finally:
     loop.stop()
     loop.close()
     printlog("Loop closed")
-    with open("bot.config", "w") as f:
+    with open(config_file, "w") as f:
         json.dump(configs, f)
