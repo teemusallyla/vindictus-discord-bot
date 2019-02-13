@@ -32,7 +32,7 @@ with open(token_file) as f:
 if not "messages.json" in os.listdir():
     sent_messages = []
     with open("messages.json", "w+") as f:
-        json.dump({"messages": sent_messages}, f)
+        json.dump({"messages": sent_messages}, f, indent=4)
 else:
     with open("messages.json") as f:
         sent_messages = json.load(f)["messages"]
@@ -43,7 +43,7 @@ with open(config_file) as f:
 if not "notifications.json" in os.listdir():
     notifications = []
     with open("notifications.json", "w+") as f:
-        json.dump(notifications, f)
+        json.dump(notifications, f, indent=4)
 else:
     with open("notifications.json") as f:
         notifications = json.load(f)
@@ -391,7 +391,7 @@ class discordClient(discord.Client):
                 with open("events.json", "w+") as f:
                     json.dump({
                         "events": [event.to_json() for event in events_not_finished],
-                        "sales": [sale.to_json() for sale in sales_not_finished]}, f)
+                        "sales": [sale.to_json() for sale in sales_not_finished]}, f, indent=4)
                 sender_name = sender.nick or sender.name
                 await self.send_message(channel, "{} added a new {}: {}".format(sender_name,
                                                                                 event_type,
@@ -452,7 +452,7 @@ class discordClient(discord.Client):
                 }
                 notifications.append(notifi)
                 with open("notifications.json", "w") as f:
-                    json.dump(notifications, f)
+                    json.dump(notifications, f, indent=4)
                 await self.send_message(message.channel, "New notification created!")
             else:
                 await self.send_message(message.channel, "Couldn't parse the message, make sure its format is '!notify December 24th 18:00 Merry Christmas Everyone!'")
@@ -528,7 +528,7 @@ async def get_news():
         if new_news["news"] != []:
             with open("news.json", "w") as news_json:
                 news["news"] = news["news"][max(0, len(news["news"]) - news_log_length):]
-                json.dump(news, news_json)
+                json.dump(news, news_json, indent=4)
         log("News gotten")
 
         await asyncio.sleep(60)
@@ -584,7 +584,7 @@ async def news_poster(client):
 
         sent_messages = sent_messages[max(0, len(sent_messages) - news_log_length):]
         with open("messages.json", "w") as messages_json:
-            json.dump({"messages": sent_messages}, messages_json)
+            json.dump({"messages": sent_messages}, messages_json, indent=4)
 
         await parseEvents(link)
 
@@ -600,7 +600,7 @@ async def notifier(client):
             for n in to_delete:
                 notifications.remove(n)
             with open("notifications.json", "w") as f:
-                json.dump(notifications, f)
+                json.dump(notifications, f, indent=4)
         await asyncio.sleep(30)
 
 async def wolfram_responder(client):
@@ -735,7 +735,7 @@ async def parseEvents(url):
         or new_sales != [] or new_events != []):
         with open("events.json", "w+") as f:
             json.dump({"events": list(map(lambda x: x.to_json(), events_not_finished)),
-                       "sales": list(map(lambda x: x.to_json(), sales_not_finished))}, f)
+                       "sales": list(map(lambda x: x.to_json(), sales_not_finished))}, f, indent=4)
 
 async def postEvents(type, destination, client):
 
@@ -778,4 +778,4 @@ finally:
     loop.close()
     printlog("Loop closed")
     with open(config_file, "w") as f:
-        json.dump(configs, f)
+        json.dump(configs, f, indent=4)

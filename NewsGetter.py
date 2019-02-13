@@ -25,6 +25,6 @@ for x in range(1, math.ceil(news_log_length / 10) + 1):
 news["news"] = news["news"][:news_log_length]
 news["news"].reverse()
 with open("news.json", "w+") as f:
-    json.dump(news, f)
+    json.dump(news, f, indent=4)
 
     
